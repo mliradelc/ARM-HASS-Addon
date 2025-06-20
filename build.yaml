@@ -1,0 +1,3 @@
+build_from:
+  amd64: pufferpanel/pufferpanel:latest
+  aarch64: pufferpanel/pufferpanel:latest

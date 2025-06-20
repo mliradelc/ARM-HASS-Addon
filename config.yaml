@@ -1,0 +1,31 @@
+name: ARM
+version: "1.0.0"
+slug: arm
+description: Automatic Ripping Machine
+arch:
+  - amd64
+  - aarch64
+startup: services
+boot: auto
+init: true
+ports:
+  8080/tcp: 8081
+options:
+  web_port: 8081
+schema:
+  web_port: int
+map:
+  - config:rw
+  - share:rw
+  - media:rw
+devices:
+  - /dev/dri
+  - /dev/sr0
+  - /dev/dri/renderD128
+privileged:
+  - SYS_ADMIN
+  - DAC_READ_SEARCH
+  - NET_ADMIN
+panel_icon: mdi:server
+panel_title: "ARM"
+ingress: false
