@@ -13,13 +13,13 @@ mkdir -p /media/arm/config
 # Copy default ARM config if not present
 if [ ! -f "/media/arm/config/config/arm.yaml" ]; then
   echo "[INFO] Copying default arm.yaml to /media/arm/config"
-  cp /defaults/arm.yaml /media/arm/config
+  cp /defaults/arm.yaml /etc/arm/config
 fi
 
 # Copy default ARM Music config if not present
 if [ ! -f "/media/arm/config/config/abcde.conf" ]; then
   echo "[INFO] Copying default abcde.conf to /media/arm/config"
-  cp /defaults/abcde.conf /media/arm/config
+  cp /defaults/abcde.conf /etc/arm/config
 fi
 
 # Start armui
