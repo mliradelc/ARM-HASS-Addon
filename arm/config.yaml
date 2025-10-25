@@ -13,7 +13,7 @@ ports:
   8089/tcp: 8081
 ports_description:
   8089/tcp: ARM Web UI
-watchdog: "tcp://[HOST]:[PORT:8089]"
+watchdog: "http://[HOST]:8089"
 options:
   web_port: 8081
 schema:
