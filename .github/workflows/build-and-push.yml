@@ -26,6 +26,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Extract version from config.yaml
+        id: version
+        run: |
+          # Get version from config.yaml
+          CONFIG_VERSION=$(grep '^version:' config.yaml | sed 's/version: *"\(.*\)"/\1/')
+          
+          # If this is a tag push, use the tag (remove 'v' prefix)
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            GIT_TAG="${GITHUB_REF#refs/tags/}"
+            VERSION="${GIT_TAG#v}"
+          else
+            VERSION="$CONFIG_VERSION"
+          fi
+          
+          echo "addon_version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -52,6 +69,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ steps.version.outputs.addon_version }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
