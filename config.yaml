@@ -1,5 +1,5 @@
 name: ARM
-version: "latest"
+version: "0.1.0"
 slug: arm
 description: Automatic Ripping Machine
 arch:
