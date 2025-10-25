@@ -1,19 +1,36 @@
-## Project Purpose
-Home Assistant add-on that packages the Automatic Ripping Machine (ARM) with Intel QuickSync support so optical discs inserted into a Home Assistant host are automatically ripped, transcoded, and stored.
+# ARM-HASS-Addon Project Overview
 
-## Tech Stack
-- Home Assistant add-on manifest and schema in YAML (`arm/config.yaml`).
-- Container filesystem overrides and init scripts under `arm/rootfs` (shell scripting).
-- Documentation in Markdown (`README.md`, `DOCS.md`, `INSTALL_IN_HA.md`).
-- Uses upstream Docker image `1337server/automatic-ripping-machine` for ARM, MakeMKV, HandBrake.
+## Purpose
+Home Assistant add-on that wraps the Automatic Ripping Machine (ARM) Docker image to provide automatic CD/DVD/Blu-ray ripping functionality within Home Assistant.
 
-## Repo Structure
-- `arm/`: add-on definition (config, docs, changelog, licensing, rootfs defaults/init scripts).
-- `arm/rootfs/defaults`: default config files (`arm.yaml`, `abcde.conf`).
-- `arm/rootfs/etc/my_init.d`: startup scripts configuring ARM environment.
-- Root docs for installation and overview.
+## Architecture
+- **Base Image**: `1337server/automatic-ripping-machine:latest` from Docker Hub
+- **Deployment**: GitHub Container Registry (GHCR) at `ghcr.io/mliradelc/arm-hass-addon`
+- **Distribution**: Custom Home Assistant add-on repository
+- **Multi-arch Support**: amd64 and arm64 (aarch64)
 
-## Notable Integrations
-- Exposes ingress web UI on port 8686 for ARM dashboard.
-- Maps Home Assistant storage (`share`, `media`) plus optical drive and Intel GPU devices.
-- Options allow configuring output directories, UID/GID, timezone, and toggling Intel QSV.
+## Key Components
+1. **Add-on Configuration** (`arm/config.yaml`): Defines add-on metadata, ports, devices, privileges
+2. **Startup Script** (`arm/rootfs/run.sh`): Initializes configuration files and starts ARM web UI
+3. **Default Configs** (`arm/rootfs/defaults/`): Contains arm.yaml, abcde.conf, apprise.yaml templates
+4. **Docker Build** (`.docker/Dockerfile`): Custom image that installs HandBrake and copies overlay files
+5. **CI/CD** (`.github/workflows/build-and-push.yml`): Automated multi-arch builds triggered by git tags
+
+## Installation
+Users add the repository URL to Home Assistant, then install the ARM add-on from the add-on store. Updates are delivered via new version tags that trigger automated builds.
+
+## Hardware Requirements
+- Optical drive access: `/dev/sr0`, `/dev/sg0`
+- Intel QuickSync support: `/dev/dri/renderD128`
+- Privileged access for hardware control
+
+## Web Interface
+- Internal Port: 8081 (where ARM listens)
+- External Port: 8089 (exposed to Home Assistant host)
+- Access: `http://[HOME_ASSISTANT_IP]:8089`
+
+## Current Status (v0.1.9)
+- Working automated builds via GitHub Actions
+- Multi-arch images published to GHCR
+- Proper health checks and network binding configured
+- All required config files (arm.yaml, abcde.conf, apprise.yaml) included
