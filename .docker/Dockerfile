@@ -13,5 +13,8 @@ COPY arm/rootfs/defaults /defaults
 COPY arm/rootfs/run.sh /run.sh
 RUN chmod +x /run.sh
 
+# Disable base image healthcheck - HA Supervisor handles this via watchdog
+HEALTHCHECK NONE
+
 # Override entrypoint to run our script
 ENTRYPOINT ["/run.sh"]
