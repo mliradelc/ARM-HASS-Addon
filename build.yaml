@@ -1,4 +1,2 @@
-image:
-  amd64: ghcr.io/mliradelc/arm-hass-addon:latest
-  aarch64: ghcr.io/mliradelc/arm-hass-addon:latest
+image: ghcr.io/mliradelc/arm-hass-addon
 
