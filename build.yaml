@@ -1,3 +1,4 @@
-build_from:
+image:
   amd64: ghcr.io/mliradelc/arm-hass-addon:latest
   aarch64: ghcr.io/mliradelc/arm-hass-addon:latest
+
