@@ -6,11 +6,12 @@ arch:
   - amd64
   - aarch64
 image: ghcr.io/mliradelc/arm-hass-addon
-startup: services
+startup: application
 boot: auto
 init: true
 ports:
   8080/tcp: 8081
+watchdog: "http://[HOST]:[PORT:8080]"
 options:
   web_port: 8081
 schema:
