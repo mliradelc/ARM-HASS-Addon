@@ -10,8 +10,8 @@ startup: application
 boot: auto
 init: true
 ports:
-  8080/tcp: 8081
-watchdog: "http://[HOST]:[PORT:8080]"
+  8089/tcp: 8081
+watchdog: "http://[HOST]:[PORT:8089]"
 options:
   web_port: 8081
 schema:
