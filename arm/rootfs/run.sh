@@ -2,26 +2,24 @@
 
 set -e
 
-# Create folders
-mkdir -p /media/arm /media/arm/transcode /media/arm/raw /media/music /media/media /media/arm/config
-
-# Symlink /etc/arm/config to media folder
-rm -rf /etc/arm/config
-ln -s /media/arm/config /share/arm_config
+# Create ARM config directory
+mkdir -p /etc/arm/config
 
 # Copy default ARM config if not present
-if [ ! -f "/media/arm/config/config/arm.yaml" ]; then
-  echo "[INFO] Copying default arm.yaml to /etc/arm_config"
-  cp /defaults/arm.yaml /media/arm/config
+if [ ! -f "/etc/arm/config/arm.yaml" ]; then
+  echo "[INFO] Copying default arm.yaml to /etc/arm/config"
+  cp /defaults/arm.yaml /etc/arm/config/arm.yaml
 fi
 
-# Copy default ARM Music config if not present
-if [ ! -f "/media/arm/config/config/abcde.conf" ]; then
-  echo "[INFO] Copying default abcde.conf to /share/arm_config"
-  cp /defaults/abcde.conf /share/arm_config
+# Copy default abcde config if not present
+if [ ! -f "/etc/arm/config/abcde.conf" ]; then
+  echo "[INFO] Copying default abcde.conf to /etc/arm/config"
+  cp /defaults/abcde.conf /etc/arm/config/abcde.conf
 fi
+
+# Create media directories
+mkdir -p /media/ripped /media/transcode /media/raw /media/music
 
 # Start armui
-echo "Starting web ui"
-chmod +x /opt/arm/arm/runui.py
-exec /sbin/setuser arm /bin/python3 /opt/arm/arm/runui.py
+echo "Starting ARM web UI"
+exec /opt/arm/arm/runui.py
