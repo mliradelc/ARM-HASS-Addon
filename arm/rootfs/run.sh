@@ -45,4 +45,4 @@ mkdir -p /media/ripped /media/transcode /media/raw /media/music
 # Start armui
 echo "[INFO] Starting ARM web UI"
 echo "[INFO] Config file: /etc/arm/config/arm.yaml"
-exec /opt/arm/arm/runui.py
+exec python3 /opt/arm/arm/runui.py
