@@ -4,6 +4,12 @@ set -e
 
 echo "[INFO] Setting up ARM configuration..."
 
+# Clean up any old symlinks/files from previous installations
+if [ -L "/share/arm_config/config" ] || [ -e "/share/arm_config/config" ]; then
+  echo "[INFO] Removing old config symlink/file"
+  rm -rf /share/arm_config/config
+fi
+
 # Create ARM config directory
 mkdir -p /etc/arm/config
 
