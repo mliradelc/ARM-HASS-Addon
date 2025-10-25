@@ -1,3 +1,3 @@
 build_from:
-  amd64: 1337server/automatic-ripping-machine:latest
-  aarch64: 1337server/automatic-ripping-machine:latest
+  amd64: ghcr.io/mliradelc/arm-hass-addon:latest
+  aarch64: ghcr.io/mliradelc/arm-hass-addon:latest
