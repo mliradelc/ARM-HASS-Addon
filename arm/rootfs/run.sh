@@ -31,6 +31,15 @@ else
   echo "[INFO] Using existing abcde.conf"
 fi
 
+# Copy default apprise config if not present
+if [ ! -f "/etc/arm/config/apprise.yaml" ]; then
+  echo "[INFO] Copying default apprise.yaml to /etc/arm/config"
+  cp /defaults/apprise.yaml /etc/arm/config/apprise.yaml
+  chmod 644 /etc/arm/config/apprise.yaml
+else
+  echo "[INFO] Using existing apprise.yaml"
+fi
+
 # Verify config files exist
 if [ ! -f "/etc/arm/config/arm.yaml" ]; then
   echo "[ERROR] Failed to create /etc/arm/config/arm.yaml"
