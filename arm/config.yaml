@@ -11,7 +11,7 @@ boot: auto
 init: true
 ports:
   8089/tcp: 8081
-watchdog: "http://[HOST]:[PORT:8089]"
+watchdog: "http://localhost:8081"
 options:
   web_port: 8081
 schema:
