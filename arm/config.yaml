@@ -10,13 +10,13 @@ startup: application
 boot: auto
 init: true
 ports:
-  8089/tcp: 8081
+  8081/tcp: 8089
 ports_description:
   8089/tcp: ARM Web UI
 watchdog: "http://[HOST]:8089"
 webui: "http://[HOST]:[PORT:8089]"
 options:
-  web_port: 8081
+  web_port: 8089
 schema:
   web_port: int
 map:
