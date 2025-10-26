@@ -1,5 +1,5 @@
 name: ARM
-version: "0.1.10"
+version: "0.1.11"
 slug: arm
 description: Automatic Ripping Machine
 arch:
@@ -19,7 +19,7 @@ options:
 schema:
   web_port: int
 map:
-  - config:rw
+  - addon_config:rw
   - share:rw
   - media:rw
 devices:

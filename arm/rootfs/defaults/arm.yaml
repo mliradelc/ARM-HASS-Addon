@@ -6,7 +6,7 @@
 
 # A friendly name for this machine. Useful if you are running multiple instances.
 # Used in notification titles.
-ARM_NAME: ""
+ARM_NAME: "Home Assistant ARM"
 
 # ARM_CHILDREN
 # Comma delimited list of child ARM servers to display on the Home Page
