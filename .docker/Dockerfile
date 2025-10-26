@@ -13,8 +13,10 @@ COPY arm/rootfs/defaults /defaults
 COPY arm/rootfs/run.sh /run.sh
 RUN chmod +x /run.sh
 
-# Disable base image healthcheck - HA Supervisor handles this via watchdog
-HEALTHCHECK NONE
+# Add healthcheck for ARM web UI on port 8081
+# Check every 30s, timeout after 10s, start checking after 60s, allow 3 retries
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8081/ || exit 1
 
 # Override entrypoint to run our script
 ENTRYPOINT ["/run.sh"]
