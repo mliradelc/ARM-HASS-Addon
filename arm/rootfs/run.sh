@@ -58,9 +58,22 @@ echo "[INFO] Created symlink: /etc/arm/config -> ${CONFIG_DIR}"
 # Create media directories
 mkdir -p /media/ripped /media/transcode /media/raw /media/music
 
-# Start armui
+# Verify and display config being used
 echo "[INFO] Starting ARM web UI"
 echo "[INFO] Config directory: ${CONFIG_DIR} (persistent)"
 echo "[INFO] Config file: ${CONFIG_DIR}/arm.yaml"
 echo "[INFO] Symlinked at: /etc/arm/config"
+
+# Display the WEBSERVER_IP setting from config
+WEBSERVER_IP_CONFIGURED=$(grep "^WEBSERVER_IP:" "${CONFIG_DIR}/arm.yaml" | awk '{print $2}')
+echo "[INFO] WEBSERVER_IP configured as: ${WEBSERVER_IP_CONFIGURED}"
+
+# Set environment variable to ensure ARM uses the config file location
+export ARM_CONFIG="${CONFIG_DIR}/arm.yaml"
+
+# Start ARM with explicit binding to 0.0.0.0 (all interfaces)
+# Force the server to listen on all interfaces by setting environment variable
+export WEBSERVER_IP="0.0.0.0"
+
+echo "[INFO] Starting ARM with WEBSERVER_IP=${WEBSERVER_IP}"
 exec python3 /opt/arm/arm/runui.py
