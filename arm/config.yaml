@@ -14,6 +14,7 @@ ports:
 ports_description:
   8089/tcp: ARM Web UI
 watchdog: "http://[HOST]:8089"
+webui: "http://[HOST]:[PORT:8089]"
 options:
   web_port: 8081
 schema:
@@ -22,10 +23,6 @@ map:
   - addon_config:rw
   - share:rw
   - media:rw
-environment:
-  ARM_CONFIG: "/config/arm.yaml"
-  WEBSERVER_IP: "0.0.0.0"
-  WEBSERVER_PORT: "8081"
 devices:
   - /dev/dri
   - /dev/sr0
