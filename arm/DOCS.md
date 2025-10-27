@@ -41,7 +41,7 @@ The main ARM configuration file controls ripping behavior, transcoding settings,
 - `TRANSCODE_PATH`, `COMPLETED_PATH` - Output directories
 - `HW_DECODE` and `HW_ENCODE` - Hardware acceleration settings
 
-Default paths:
+Default paths (created automatically on startup):
 - Completed media: `/media/media/completed/`
 - Music: `/media/music/`
 - Transcode/temporary: `/media/arm/`
@@ -88,7 +88,7 @@ The add-on uses the following volume mappings:
 
 ## Web UI
 
-Access the ARM web interface at: `http://homeassistant.local:8089`
+Open the ARM interface via the Home Assistant add-on ingress (Add-on → ARM → Open Web UI) or directly at `http://homeassistant.local:8089`.
 
 The web UI provides:
 - Active ripping job status

@@ -11,6 +11,30 @@ CONFIG_DIR="/config"
 # Ensure config directory exists
 mkdir -p "${CONFIG_DIR}"
 
+read_config_value() {
+  local key="$1"
+  local line value
+  line=$(grep -E "^${key}:" "${CONFIG_DIR}/arm.yaml" || true)
+  if [ -z "${line}" ]; then
+    return
+  fi
+  value="${line#*:}"
+  value="${value%%#*}"
+  value="$(echo "${value}" | awk '{$1=$1;print}')"
+  value="${value#\"}"
+  value="${value%\"}"
+  echo "${value}"
+}
+
+ensure_directory() {
+  local path="$1"
+  if [ -z "${path}" ]; then
+    return
+  fi
+  mkdir -p "${path}"
+  echo "[INFO] Ensured path exists: ${path}"
+}
+
 # Copy default ARM config if not present
 if [ ! -f "${CONFIG_DIR}/arm.yaml" ]; then
   echo "[INFO] Copying default arm.yaml to ${CONFIG_DIR}"
@@ -55,8 +79,21 @@ fi
 ln -s "${CONFIG_DIR}" /etc/arm/config
 echo "[INFO] Created symlink: /etc/arm/config -> ${CONFIG_DIR}"
 
-# Create media directories
-mkdir -p /media/ripped /media/transcode /media/raw /media/music
+# Ensure directories defined in config exist
+RAW_PATH=$(read_config_value "RAW_PATH")
+TRANSCODE_PATH=$(read_config_value "TRANSCODE_PATH")
+COMPLETED_PATH=$(read_config_value "COMPLETED_PATH")
+LOGPATH=$(read_config_value "LOGPATH")
+DBFILE=$(read_config_value "DBFILE")
+
+ensure_directory "${RAW_PATH}"
+ensure_directory "${TRANSCODE_PATH}"
+ensure_directory "${COMPLETED_PATH}"
+ensure_directory "${LOGPATH}"
+
+if [ -n "${DBFILE}" ]; then
+  ensure_directory "$(dirname "${DBFILE}")"
+fi
 
 # Verify and display config being used
 echo "[INFO] Starting ARM web UI"

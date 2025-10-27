@@ -33,4 +33,5 @@ privileged:
   - NET_ADMIN
 panel_icon: mdi:server
 panel_title: "ARM"
-ingress: false
+ingress: true
+ingress_port: 8081
