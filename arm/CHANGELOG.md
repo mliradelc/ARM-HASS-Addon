@@ -2,6 +2,13 @@
 
 All notable changes to the ARM Home Assistant add-on are documented in this file. Release dates use the YYYY-MM-DD format.
 
+## [0.2.1] - 2025-10-27
+
+- **Changed**: Aligned ARM's internal web server to use port 8089, matching the external port to simplify networking and ingress.
+- **Fixed**: Updated health checks, default configuration, and documentation to reference the unified port mapping.
+- **Added**: Included the project MIT license for distribution clarity.
+- **Docs**: Embedded the add-on logo in README and DOCS for clearer branding.
+
 ## [0.2.0] - 2025-10-27
 
 - **Added**: Enabled Home Assistant ingress so the ARM web UI can open inside the Supervisor sidebar.
@@ -12,7 +19,7 @@ All notable changes to the ARM Home Assistant add-on are documented in this file
 ## [0.1.14] - 2025-10-26
 
 - **Added**: Introduced a container health check that polls the ARM UI using `netcat-openbsd` before the Supervisor watchdog intervenes.
-- **Fixed**: Corrected the port mapping to expose external port 8089 while ARM continues to listen on 8081 inside the container.
+- **Fixed**: Corrected the port mapping so external port 8089 aligned with the container listener.
 
 ## [0.1.13] - 2025-10-26
 
@@ -47,7 +54,7 @@ All notable changes to the ARM Home Assistant add-on are documented in this file
 
 ## [0.1.6] - 2025-10-26
 
-- **Fixed**: Pointed the watchdog to ARM's internal port 8081 to match the service binding.
+- **Fixed**: Pointed the watchdog to ARM's internal web port to match the service binding.
 
 ## [0.1.5] - 2025-10-26
 

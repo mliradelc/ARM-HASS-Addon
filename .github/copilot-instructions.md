@@ -17,15 +17,15 @@
 - Keep `arm/config.yaml` version synchronized with git tags for releases. Version format: `"X.Y.Z"` (quoted string).
 - The startup script `arm/rootfs/run.sh` copies configs with `if [ ! -f ]` checks to preserve user modifications.
 - Configuration files live in `/etc/arm/config/` at runtime (where ARM expects them), not in `/data/options.json` location.
-- Critical ARM config: `WEBSERVER_IP: 0.0.0.0` (listen on all interfaces), `WEBSERVER_PORT: 8081` (internal port).
-- Port mapping: `8089/tcp: 8081` in config.yaml means external port 8089 maps to internal port 8081.
+- Critical ARM config: `WEBSERVER_IP: 0.0.0.0` (listen on all interfaces), `WEBSERVER_PORT: 8089` (internal port).
+- Port mapping: `8089/tcp: 8089` in config.yaml keeps internal and external ports aligned.
 - Watchdog URL format: `http://[HOST]:8089` - must use `[HOST]` placeholder and reference external port number.
 - Bash scripts should use `set -e` for error handling; use `exec python3` for Python scripts to ensure proper process replacement.
 - Documentation lives alongside code (`README.md`, `arm/DOCS.md`) and must reflect any option or path changes.
 
 ## Common Workflows
 - **Version release**: Update version in `arm/config.yaml` → commit → create git tag `vX.Y.Z` → push tag → GitHub Actions builds and publishes images.
-- **Testing locally**: Build with `docker build -f .docker/Dockerfile -t test-arm .` and run with `docker run -p 8089:8081 test-arm`.
+- **Testing locally**: Build with `docker build -f .docker/Dockerfile -t test-arm .` and run with `docker run -p 8089:8089 test-arm`.
 - **Validate add-on**: In HA, reload add-on repository, update to new version, check logs for startup messages.
 - When editing `run.sh`, maintain execute bit with `chmod +x arm/rootfs/run.sh` before committing.
 - To verify image on GHCR: Check https://github.com/mliradelc/ARM-HASS-Addon/pkgs/container/arm-hass-addon
@@ -39,7 +39,7 @@
 
 ## Integration Notes
 - External port 8089 was chosen to avoid conflicts with common services using 8080.
-- Port mapping in `arm/config.yaml` uses format `EXTERNAL/tcp: INTERNAL` - watchdog checks EXTERNAL, service listens on INTERNAL.
+- Port mapping in `arm/config.yaml` uses format `EXTERNAL/tcp: INTERNAL` - watchdog checks EXTERNAL, service listens on INTERNAL (both 8089 by default).
 - Media directories are created by run.sh: `/media/ripped`, `/media/transcode`, `/media/raw`, `/media/music`.
 - Home Assistant maps volumes as defined in `map:` section - `config:rw`, `share:rw`, `media:rw`.
 

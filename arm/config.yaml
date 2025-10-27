@@ -1,7 +1,8 @@
 name: ARM
-version: "0.1.14"
+version: "0.2.1"
 slug: arm
 description: Automatic Ripping Machine
+link: https://github.com/mliradelc/ARM-HASS-Addon
 arch:
   - amd64
   - aarch64
@@ -10,7 +11,7 @@ startup: application
 boot: auto
 init: true
 ports:
-  8081/tcp: 8089
+  8089/tcp: 8089
 ports_description:
   8089/tcp: ARM Web UI
 watchdog: "http://[HOST]:8089"
@@ -34,4 +35,4 @@ privileged:
 panel_icon: mdi:server
 panel_title: "ARM"
 ingress: true
-ingress_port: 8081
+ingress_port: 8089

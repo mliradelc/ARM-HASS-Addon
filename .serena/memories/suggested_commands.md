@@ -39,7 +39,7 @@ git push origin v0.1.9
 docker build -f .docker/Dockerfile -t test-arm .
 
 # Run container for testing
-docker run -p 8089:8081 -v ./test-config:/etc/arm/config test-arm
+docker run -p 8089:8089 -v ./test-config:/etc/arm/config test-arm
 
 # Check logs
 docker logs [container-id]
@@ -54,8 +54,8 @@ docker inspect [container-id]
 docker exec -it [container-id] /bin/bash
 
 # Test web service internally
-curl http://localhost:8081
-curl http://172.30.33.11:8081
+curl http://localhost:8089
+curl http://172.30.33.11:8089
 
 # Check files
 ls -la /etc/arm/config/

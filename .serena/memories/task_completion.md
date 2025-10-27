@@ -56,7 +56,7 @@ October 26, 2025
 - **Deployment**: Images available at ghcr.io/mliradelc/arm-hass-addon:0.1.9
 - **Repository**: Properly structured as HA add-on repository
 - **Configuration**: All required files present and properly configured
-- **Network**: Service listening on 0.0.0.0:8081, exposed on port 8089
+- **Network**: Service listening on 0.0.0.0:8089, exposed on port 8089
 
 ## Remaining Tasks
 - [ ] Test v0.1.9 once build completes

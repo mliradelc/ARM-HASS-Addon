@@ -25,7 +25,7 @@ Users add the repository URL to Home Assistant, then install the ARM add-on from
 - Privileged access for hardware control
 
 ## Web Interface
-- Internal Port: 8081 (where ARM listens)
+- Internal Port: 8089 (where ARM listens)
 - External Port: 8089 (exposed to Home Assistant host)
 - Access: `http://[HOME_ASSISTANT_IP]:8089`
 
