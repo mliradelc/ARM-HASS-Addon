@@ -29,11 +29,4 @@ My attempt to get Automatic Ripping Machine running on Home Assistant OS Supervi
 
 ## Install
 
-This addon is still very much in testing, but if you want to try it:
-
-- Download this GitHub repository.
-- Copy the addon root folder into `/addons` (use the Samba addon to access the host filesystem).
-- Refresh the addon store in Home Assistant.
-- Click install and wait for the build process to finish.
-- Access the web UI on port 8089 (matching internal and external ports).
-- Configuration files are automatically created on first run and stored persistently.
+Add this repository URL to the Home Assistant add-on store (Settings → Add-ons → Add-on Store → ⁝ → Repositories), then install the “ARM” add-on from the list. The add-on listens on port 8089 and creates its configuration files on first run.
