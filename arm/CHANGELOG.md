@@ -2,8 +2,15 @@
 
 All notable changes to the ARM Home Assistant add-on are documented in this file. Release dates use the YYYY-MM-DD format.
 
+## [0.2.2] - 2025-10-28
+
+- **Added**: Exposed `/dev/sg0` by default so ARM can interact with optical drives that require the generic SCSI node.
+- **Changed**: Refreshed addon artwork (logo/icon/banner) for improved branding.
+- **Changed**: Updated the Supervisor sidebar icon to `mdi:compact-disc` to better represent the add-on.
+
 ## [0.2.1] - 2025-10-27
 
+- **Breaking**: Home Assistant does not overwrite existing `arm.yaml`; update `WEBSERVER_PORT` to `8089` manually in `/addon_configs/local_arm/arm.yaml` if you upgraded from an earlier release.
 - **Changed**: Aligned ARM's internal web server to use port 8089, matching the external port to simplify networking and ingress.
 - **Fixed**: Updated health checks, default configuration, and documentation to reference the unified port mapping.
 - **Added**: Included the project MIT license for distribution clarity.

@@ -1,5 +1,5 @@
 name: ARM
-version: "0.2.1"
+version: "0.2.2"
 slug: arm
 description: Automatic Ripping Machine
 link: https://github.com/mliradelc/ARM-HASS-Addon
@@ -27,12 +27,13 @@ map:
 devices:
   - /dev/dri
   - /dev/sr0
+  - /dev/sg0
   - /dev/dri/renderD128
 privileged:
   - SYS_ADMIN
   - DAC_READ_SEARCH
   - NET_ADMIN
-panel_icon: mdi:server
+panel_icon: mdi:compact-disc
 panel_title: "ARM"
 ingress: true
 ingress_port: 8089
