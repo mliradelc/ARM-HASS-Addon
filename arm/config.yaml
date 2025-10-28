@@ -1,5 +1,5 @@
 name: ARM
-version: "0.2.2"
+version: "0.2.3"
 slug: arm
 description: Automatic Ripping Machine
 link: https://github.com/mliradelc/ARM-HASS-Addon
@@ -29,6 +29,8 @@ devices:
   - /dev/sr0
   - /dev/sg0
   - /dev/dri/renderD128
+udev: true
+kernel_modules: true
 privileged:
   - SYS_ADMIN
   - DAC_READ_SEARCH

@@ -2,6 +2,10 @@
 
 All notable changes to the ARM Home Assistant add-on are documented in this file. Release dates use the YYYY-MM-DD format.
 
+## [0.2.3] - 2025-10-29
+
+- **Added**: Enabled `udev` and kernel module access (`kernel_modules: true`) so ARM can interact with optical drives requiring additional device nodes.
+
 ## [0.2.2] - 2025-10-28
 
 - **Added**: Exposed `/dev/sg0` by default so ARM can interact with optical drives that require the generic SCSI node.
