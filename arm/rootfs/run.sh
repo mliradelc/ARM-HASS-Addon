@@ -96,7 +96,7 @@ if [ -n "${DBFILE}" ]; then
 fi
 
 # Verify and display config being used
-echo "[INFO] Starting ARM web UI"
+echo "[INFO] Starting ARM web UI with ingress support"
 echo "[INFO] Config directory: ${CONFIG_DIR} (persistent)"
 echo "[INFO] Config file: ${CONFIG_DIR}/arm.yaml"
 echo "[INFO] Symlinked at: /etc/arm/config"
@@ -108,9 +108,40 @@ echo "[INFO] WEBSERVER_IP configured as: ${WEBSERVER_IP_CONFIGURED}"
 # Set environment variable to ensure ARM uses the config file location
 export ARM_CONFIG="${CONFIG_DIR}/arm.yaml"
 
-# Start ARM with explicit binding to 0.0.0.0 (all interfaces)
-# Force the server to listen on all interfaces by setting environment variable
+# Configure ARM to run on internal port 8090
+# Nginx will proxy from port 8089 (ingress) to 8090 (ARM)
 export WEBSERVER_IP="0.0.0.0"
+export WEBSERVER_PORT="8090"
 
-echo "[INFO] Starting ARM with WEBSERVER_IP=${WEBSERVER_IP}"
-exec python3 /opt/arm/arm/runui.py
+echo "[INFO] Starting nginx reverse proxy for ingress support..."
+echo "[INFO] Nginx listening on port 8089 (ingress)"
+echo "[INFO] ARM listening on port 8090 (internal)"
+
+# Start nginx in the background
+nginx -g 'daemon off;' &
+NGINX_PID=$!
+echo "[INFO] Nginx started with PID ${NGINX_PID}"
+
+# Give nginx a moment to start
+sleep 2
+
+# Function to handle shutdown
+shutdown_handler() {
+    echo "[INFO] Shutting down services..."
+    kill -TERM "$ARM_PID" 2>/dev/null
+    kill -TERM "$NGINX_PID" 2>/dev/null
+    wait
+    exit 0
+}
+
+# Trap termination signals
+trap shutdown_handler SIGTERM SIGINT
+
+# Start ARM web UI in background
+echo "[INFO] Starting ARM with WEBSERVER_IP=${WEBSERVER_IP} WEBSERVER_PORT=${WEBSERVER_PORT}"
+python3 /opt/arm/arm/runui.py &
+ARM_PID=$!
+echo "[INFO] ARM started with PID ${ARM_PID}"
+
+# Wait for ARM process (main service)
+wait "$ARM_PID"

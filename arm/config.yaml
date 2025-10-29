@@ -1,5 +1,5 @@
 name: ARM
-version: "0.2.4"
+version: "0.2.5"
 slug: arm
 description: Automatic Ripping Machine
 link: https://github.com/mliradelc/ARM-HASS-Addon

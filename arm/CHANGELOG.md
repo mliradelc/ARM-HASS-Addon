@@ -2,6 +2,12 @@
 
 All notable changes to the ARM Home Assistant add-on are documented in this file. Release dates use the YYYY-MM-DD format.
 
+## [0.2.5] - 2025-10-29
+
+- **Fixed**: Ingress mode now properly loads CSS, JavaScript, and image assets through nginx reverse proxy with path rewriting.
+- **Added**: Nginx reverse proxy to handle Home Assistant ingress path translation.
+- **Improved**: Enhanced process management with proper signal handling for both nginx and ARM services.
+
 ## [0.2.4] - 2025-10-29
 
 - **Warning**: Marked the add-on as experimental and enabled unrestricted host filesystem access to aid troubleshooting; only install when you require deep debugging.
