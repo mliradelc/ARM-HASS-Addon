@@ -2,9 +2,9 @@ FROM docker.io/1337server/automatic-ripping-machine:latest
 
 WORKDIR /
 
-# Install network tools for healthcheck
+# Install network tools for healthcheck and nginx for ingress support
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends netcat-openbsd && \
+    apt-get install -y --no-install-recommends netcat-openbsd nginx && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -14,6 +14,9 @@ RUN ./install_handbrake.sh
 
 # Copy default config files
 COPY arm/rootfs/defaults /defaults
+
+# Copy nginx configuration for ingress support
+COPY arm/rootfs/etc/nginx/nginx.conf /etc/nginx/nginx.conf
 
 # Copy startup script
 COPY arm/rootfs/run.sh /run.sh
