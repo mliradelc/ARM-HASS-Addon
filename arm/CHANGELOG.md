@@ -2,6 +2,10 @@
 
 All notable changes to the ARM Home Assistant add-on are documented in this file. Release dates use the YYYY-MM-DD format.
 
+## [0.2.5] - 2025-10-29
+
+- **Warning**: Expanded privileges by setting `privileged: true` in addition to `full_access: true`, granting the container every host capability for deep troubleshooting.
+
 ## [0.2.4] - 2025-10-29
 
 - **Warning**: Marked the add-on as experimental and enabled unrestricted host filesystem access to aid troubleshooting; only install when you require deep debugging.

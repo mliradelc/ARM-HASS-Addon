@@ -1,7 +1,8 @@
 name: ARM
-version: "0.2.4"
+version: "0.2.5"
 slug: arm
 description: Automatic Ripping Machine
+stage: experimental
 link: https://github.com/mliradelc/ARM-HASS-Addon
 arch:
   - amd64
@@ -34,10 +35,12 @@ full_access: true
 device_tree: true
 udev: true
 kernel_modules: true
-privileged:
-  - SYS_ADMIN
-  - DAC_READ_SEARCH
-  - NET_ADMIN
+privileged: true
+# privileged:
+#   - SYS_ADMIN
+#   - DAC_READ_SEARCH
+#   - NET_ADMIN
+#   - SYS_RAWIO
 panel_icon: mdi:compact-disc
 panel_title: "ARM"
 ingress: true
