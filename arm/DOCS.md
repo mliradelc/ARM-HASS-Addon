@@ -102,7 +102,12 @@ The add-on uses the following volume mappings:
 
 ## Web UI
 
-Open the ARM interface via the Home Assistant add-on ingress (Add-on → ARM → Open Web UI) or directly at `http://homeassistant.local:8089`.
+Access the ARM interface through:
+
+- **Ingress (Recommended)**: Click "Open Web UI" from the add-on page or use the ARM panel in Home Assistant's sidebar.
+- **Direct Access**: Navigate to `http://homeassistant.local:8089` (requires network access to port 8089).
+
+The ingress mode uses a reverse proxy (nginx) to properly handle Home Assistant's ingress path, ensuring all assets (CSS, JavaScript, images) load correctly.
 
 The web UI provides:
 
@@ -155,6 +160,13 @@ For issues and questions:
 - Open an issue on the add-on repository.
 
 ## Version History
+
+### 0.2.5
+
+- **Fixed**: Ingress mode now properly loads CSS, JavaScript, and image assets.
+- Added nginx reverse proxy to handle Home Assistant ingress path rewriting.
+- Improved process management for both nginx and ARM services.
+- Enhanced logging for ingress configuration.
 
 ### 0.1.11
 

@@ -19,6 +19,7 @@ My attempt to get Automatic Ripping Machine running on Home Assistant with Intel
 - Configuration files can be edited directly from Home Assistant using the File Editor add-on or via Samba/SSH.
 - The configs set media output paths to `/media/music/` and `/media/media/completed/`.
 - Related folders like `transcode` and `raw` live in `/media/arm/` to simplify cleanup for now.
+- Ingress mode is fully supported with nginx reverse proxy handling asset path rewriting.
 
 ## Configuration
 
