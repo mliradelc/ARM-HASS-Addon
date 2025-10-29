@@ -2,7 +2,9 @@
 
 ![ARM Logo](arm/logo.png)
 
-My attempt to get Automatic Ripping Machine running on Home Assistant OS Supervised with Intel QSV support.
+My attempt to get Automatic Ripping Machine running on Home Assistant with Intel QSV support.
+
+**Note:** This addon is still in Alpha phase, **it's not functional yet**. You are welcome to participate into the developing of this add-on
 
 ## Goal
 
