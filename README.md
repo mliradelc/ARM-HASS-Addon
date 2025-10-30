@@ -45,6 +45,7 @@ The GitHub Actions workflow intelligently determines whether to rebuild the cont
 - `.docker/Dockerfile` is modified
 - `arm/rootfs/run.sh` is modified
 - Any file in `arm/rootfs/defaults/` is modified
+- The `force_rebuild` input is checked when manually running the workflow
 
 **Image retagging (no rebuild) occurs when:**
 - Only non-image files are changed (e.g., documentation, configuration metadata)
@@ -56,5 +57,27 @@ The workflow automatically:
 3. Retags the existing image with new version labels if no relevant changes detected
 
 This optimization reduces unnecessary builds while ensuring the image is always rebuilt when functional changes occur.
+
+#### Manual Workflow Dispatch
+
+The workflow can be triggered manually with a `force_rebuild` option:
+
+1. Go to the **Actions** tab in GitHub
+2. Select the **Build and Push Docker Image** workflow
+3. Click **Run workflow**
+4. Check the **Force a rebuild of the container image** option to bypass change detection and force a complete rebuild
+
+This is useful for:
+- Recovering from failed builds
+- Rebuilding after upstream base image updates
+- Testing the full build pipeline
+
+#### Debug Logging
+
+When GitHub Actions debug logging is enabled (by setting the `ACTIONS_STEP_DEBUG` repository secret to `true`), the workflow provides detailed information about:
+- Which file patterns trigger rebuilds
+- All files that changed in the current diff
+- Which changed files matched the rebuild patterns
+- The decision-making logic for rebuild vs. retag
 
 Note: For manual triggers (workflow_dispatch) the workflow now compares the branch changes against the repository default branch (assumed `master`) and will retag the latest image if only non-image files changed. If your default branch is not `master`, adjust the workflow's DEFAULT_BRANCH variable accordingly.

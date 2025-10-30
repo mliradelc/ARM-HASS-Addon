@@ -63,6 +63,11 @@ jobs:
             "arm/rootfs/defaults/"
           )
 
+          echo "::debug::Image-relevant patterns that trigger rebuild:"
+          for pat in "${IMAGE_FILES[@]}"; do
+            echo "::debug::  - ${pat}"
+          done
+
           is_tag=false
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
             is_tag=true
@@ -71,15 +76,18 @@ jobs:
           # Helper: check a diff list for any image-relevant files
           changed_in_list() {
             local list="$1"
+            local found=false
             while read -r f; do
+              [[ -z "$f" ]] && continue
               for pat in "${IMAGE_FILES[@]}"; do
                 # Match either exact file or directory prefix
                 if [[ "$f" == "$pat" ]] || [[ "$f" == ${pat}* ]]; then
-                  echo "::debug::Match found: $f"
-                  return 0
+                  echo "::debug::Match found: $f (matches pattern: ${pat})"
+                  found=true
                 fi
               done
             done <<<"$list"
+            [ "$found" = true ] && return 0
             return 1
           }
 
@@ -118,8 +126,18 @@ jobs:
             DIFF_LIST=$(git diff --name-only "${BASE_REF}" "${TARGET_REF}")
           fi
 
-          echo "::debug::Files in diff:\n${DIFF_LIST}"
+          # Log all changed files in debug mode
+          if [ -n "$DIFF_LIST" ]; then
+            echo "::debug::Files changed in this diff:"
+            while read -r file; do
+              [[ -n "$file" ]] && echo "::debug::  - $file"
+            done <<<"$DIFF_LIST"
+          else
+            echo "::debug::No files changed in diff"
+          fi
 
+          # Check if any changed files match our patterns
+          echo "::debug::Checking for matches against image-relevant patterns..."
           if changed_in_list "$DIFF_LIST"; then
             echo "Image-relevant files changed, rebuild required."
             echo "rebuild=true" >> "$GITHUB_OUTPUT"
