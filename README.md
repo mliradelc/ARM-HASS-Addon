@@ -80,4 +80,8 @@ When GitHub Actions debug logging is enabled (by setting the `ACTIONS_STEP_DEBUG
 - Which changed files matched the rebuild patterns
 - The decision-making logic for rebuild vs. retag
 
-Note: For manual triggers (workflow_dispatch) the workflow now compares the branch changes against the repository default branch (assumed `master`) and will retag the latest image if only non-image files changed. If your default branch is not `master`, adjust the workflow's DEFAULT_BRANCH variable accordingly.
+**Note:** For manual workflow triggers (workflow_dispatch):
+- When `force_rebuild` is **checked**: All change detection is bypassed and a full rebuild is performed
+- When `force_rebuild` is **unchecked**: The workflow compares branch changes against the repository default branch (assumed `master`) and will retag the latest image if only non-image files changed
+
+If your default branch is not `master`, adjust the workflow's `DEFAULT_BRANCH` variable accordingly (line 120 in `build-and-push.yml`).
