@@ -1,5 +1,5 @@
 name: ARM
-version: "0.2.5"
+version: "0.2.6"
 slug: arm
 description: Automatic Ripping Machine
 stage: experimental
