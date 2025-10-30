@@ -35,12 +35,11 @@ full_access: true
 device_tree: true
 udev: true
 kernel_modules: true
-privileged: true
-# privileged:
-#   - SYS_ADMIN
-#   - DAC_READ_SEARCH
-#   - NET_ADMIN
-#   - SYS_RAWIO
+privileged:
+   - SYS_ADMIN   
+   - DAC_READ_SEARCH
+   - NET_ADMIN
+   - SYS_RAWIO
 panel_icon: mdi:compact-disc
 panel_title: "ARM"
 ingress: true
