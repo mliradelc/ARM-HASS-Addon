@@ -5,6 +5,12 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: 'Force a rebuild of the container image'
+        required: false
+        type: boolean
+        default: false
 
 env:
   REGISTRY: ghcr.io
@@ -40,50 +46,104 @@ jobs:
           echo "addon_version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "Building version: ${VERSION}"
 
-      - name: Detect changes in image-relevant files
+      - name: Detect changes and decide on rebuild
         id: changes
         run: |
-          # Define files that trigger image rebuild
+          # Check for manual override
+          if [[ "${{ github.event.inputs.force_rebuild }}" == "true" ]]; then
+            echo "Force rebuild requested via workflow input, skipping change detection."
+            echo "rebuild=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Files/paths that should trigger a rebuild when changed
           IMAGE_FILES=(
             ".docker/Dockerfile"
             "arm/rootfs/run.sh"
             "arm/rootfs/defaults/"
           )
 
-          # Check if this is a tag push
+          echo "::debug::Image-relevant patterns that trigger rebuild:"
+          for pat in "${IMAGE_FILES[@]}"; do
+            echo "::debug::  - ${pat}"
+          done
+
+          is_tag=false
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            # Get the previous tag
-            PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -A1 "^${GITHUB_REF#refs/tags/}$" | tail -1)
+            is_tag=true
+          fi
 
-            if [ -z "${PREVIOUS_TAG}" ]; then
-              echo "No previous tag found, forcing rebuild"
-              echo "rebuild=true" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
+          # Helper: check a diff list for any image-relevant files
+          changed_in_list() {
+            local list="$1"
+            local found=false
+            while read -r f; do
+              [[ -z "$f" ]] && continue
+              for pat in "${IMAGE_FILES[@]}"; do
+                # Match either exact file or directory prefix
+                if [[ "$f" == "$pat" ]] || [[ "$f" == ${pat}* ]]; then
+                  echo "::debug::Match found: $f (matches pattern: ${pat})"
+                  found=true
+                fi
+              done
+            done <<<"$list"
+            [ "$found" = true ] && return 0
+            return 1
+          }
 
-            echo "Comparing changes between ${PREVIOUS_TAG} and ${GITHUB_REF#refs/tags/}"
-
-            # Check if any image-relevant files changed
-            CHANGED=false
-            for file in "${IMAGE_FILES[@]}"; do
-              if git diff --name-only "${PREVIOUS_TAG}" "${GITHUB_REF#refs/tags/}" | grep -q "^${file}"; then
-                echo "Change detected in: ${file}"
-                CHANGED=true
-                break
-              fi
-            done
-
-            if [ "${CHANGED}" = true ]; then
-              echo "rebuild=true" >> "$GITHUB_OUTPUT"
-              echo "Image-relevant files changed, rebuild required"
-            else
-              echo "rebuild=false" >> "$GITHUB_OUTPUT"
-              echo "No image-relevant files changed, will retag existing image"
-            fi
+          # Determine the source tag for a potential retag operation
+          SOURCE_TAG=""
+          if [ "$is_tag" = true ]; then
+            CURRENT_TAG="${GITHUB_REF#refs/tags/}"
+            SOURCE_TAG=$(git tag --sort=-creatordate | grep -v "^${CURRENT_TAG}$" | head -n1 || true)
           else
-            # For workflow_dispatch or non-tag events, always rebuild
+            SOURCE_TAG=$(git tag --sort=-creatordate | head -n1 || true)
+          fi
+          echo "::debug::Potential source tag for retag: ${SOURCE_TAG}"
+          echo "source_tag=${SOURCE_TAG}" >> "$GITHUB_OUTPUT"
+
+          # If no source tag exists, we must rebuild
+          if [ -z "$SOURCE_TAG" ]; then
+            echo "No previous tag found to retag from, forcing rebuild."
             echo "rebuild=true" >> "$GITHUB_OUTPUT"
-            echo "Non-tag trigger, forcing rebuild"
+            exit 0
+          fi
+
+          # Determine diff range
+          DIFF_LIST=""
+          if [ "$is_tag" = true ]; then
+            BASE_REF="${SOURCE_TAG}"
+            TARGET_REF="${CURRENT_TAG}"
+            echo "Comparing changes between tags: ${BASE_REF} and ${TARGET_REF}"
+            DIFF_LIST=$(git diff --name-only "${BASE_REF}" "${TARGET_REF}")
+          else
+            DEFAULT_BRANCH=master
+            echo "Fetching ${DEFAULT_BRANCH} for comparison"
+            git fetch origin ${DEFAULT_BRANCH} --depth=1 || true
+            BASE_REF="origin/${DEFAULT_BRANCH}"
+            TARGET_REF="${GITHUB_SHA}"
+            echo "Comparing changes between branch: ${BASE_REF} and ${TARGET_REF}"
+            DIFF_LIST=$(git diff --name-only "${BASE_REF}" "${TARGET_REF}")
+          fi
+
+          # Log all changed files in debug mode
+          if [ -n "$DIFF_LIST" ]; then
+            echo "::debug::Files changed in this diff:"
+            while read -r file; do
+              [[ -n "$file" ]] && echo "::debug::  - $file"
+            done <<<"$DIFF_LIST"
+          else
+            echo "::debug::No files changed in diff"
+          fi
+
+          # Check if any changed files match our patterns
+          echo "::debug::Checking for matches against image-relevant patterns..."
+          if changed_in_list "$DIFF_LIST"; then
+            echo "Image-relevant files changed, rebuild required."
+            echo "rebuild=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No image-relevant files changed, will retag existing image."
+            echo "rebuild=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Set up QEMU
@@ -132,21 +192,19 @@ jobs:
         if: steps.changes.outputs.rebuild == 'false'
         run: |
           echo "No rebuild needed, retagging existing image"
-
-          # Get the previous tag to use as source
-          PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -A1 "^${GITHUB_REF#refs/tags/}$" | tail -1)
-          SOURCE_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${PREVIOUS_TAG#v}"
+          SOURCE_TAG="${{ steps.changes.outputs.source_tag }}"
+          SOURCE_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${SOURCE_TAG#v}"
 
           echo "Source image: ${SOURCE_IMAGE}"
           echo "New tags: ${{ steps.meta.outputs.tags }}"
 
-          # Pull the source image for both architectures
-          docker buildx imagetools create --tag dummy "${SOURCE_IMAGE}" 2>/dev/null || {
-            echo "Warning: Could not verify source image exists"
-            echo "This may be expected for first-time builds"
-            echo "Forcing rebuild instead"
+          # Verify the source image exists before attempting to retag
+          if ! docker buildx imagetools inspect "${SOURCE_IMAGE}" > /dev/null 2>&1; then
+            echo "::error::Source image ${SOURCE_IMAGE} not found in registry. Cannot retag."
+            echo "::error::This can happen if the previous tag's build failed or was deleted."
+            echo "::error::To resolve, you can run this workflow again with 'Force rebuild' checked."
             exit 1
-          }
+          fi
 
           # Create new tags by copying the manifest
           for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr '\n' ' '); do
