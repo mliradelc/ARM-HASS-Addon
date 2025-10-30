@@ -34,11 +34,11 @@ jobs:
             GIT_TAG="${GITHUB_REF#refs/tags/}"
             VERSION="${GIT_TAG#v}"
           else
-            VERSION="$CONFIG_VERSION"
+            VERSION="${CONFIG_VERSION}"
           fi
 
-          echo "addon_version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Building version: $VERSION"
+          echo "addon_version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Building version: ${VERSION}"
 
       - name: Detect changes in image-relevant files
         id: changes
@@ -55,34 +55,34 @@ jobs:
             # Get the previous tag
             PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -A1 "^${GITHUB_REF#refs/tags/}$" | tail -1)
 
-            if [ -z "$PREVIOUS_TAG" ]; then
+            if [ -z "${PREVIOUS_TAG}" ]; then
               echo "No previous tag found, forcing rebuild"
-              echo "rebuild=true" >> $GITHUB_OUTPUT
+              echo "rebuild=true" >> "$GITHUB_OUTPUT"
               exit 0
             fi
 
-            echo "Comparing changes between $PREVIOUS_TAG and ${GITHUB_REF#refs/tags/}"
+            echo "Comparing changes between ${PREVIOUS_TAG} and ${GITHUB_REF#refs/tags/}"
 
             # Check if any image-relevant files changed
             CHANGED=false
             for file in "${IMAGE_FILES[@]}"; do
-              if git diff --name-only "$PREVIOUS_TAG" "${GITHUB_REF#refs/tags/}" | grep -q "^${file}"; then
-                echo "Change detected in: $file"
+              if git diff --name-only "${PREVIOUS_TAG}" "${GITHUB_REF#refs/tags/}" | grep -q "^${file}"; then
+                echo "Change detected in: ${file}"
                 CHANGED=true
                 break
               fi
             done
 
-            if [ "$CHANGED" = true ]; then
-              echo "rebuild=true" >> $GITHUB_OUTPUT
+            if [ "${CHANGED}" = true ]; then
+              echo "rebuild=true" >> "$GITHUB_OUTPUT"
               echo "Image-relevant files changed, rebuild required"
             else
-              echo "rebuild=false" >> $GITHUB_OUTPUT
+              echo "rebuild=false" >> "$GITHUB_OUTPUT"
               echo "No image-relevant files changed, will retag existing image"
             fi
           else
             # For workflow_dispatch or non-tag events, always rebuild
-            echo "rebuild=true" >> $GITHUB_OUTPUT
+            echo "rebuild=true" >> "$GITHUB_OUTPUT"
             echo "Non-tag trigger, forcing rebuild"
           fi
 
@@ -137,11 +137,11 @@ jobs:
           PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -A1 "^${GITHUB_REF#refs/tags/}$" | tail -1)
           SOURCE_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${PREVIOUS_TAG#v}"
 
-          echo "Source image: $SOURCE_IMAGE"
+          echo "Source image: ${SOURCE_IMAGE}"
           echo "New tags: ${{ steps.meta.outputs.tags }}"
 
           # Pull the source image for both architectures
-          docker buildx imagetools create --tag dummy $SOURCE_IMAGE 2>/dev/null || {
+          docker buildx imagetools create --tag dummy "${SOURCE_IMAGE}" 2>/dev/null || {
             echo "Warning: Could not verify source image exists"
             echo "This may be expected for first-time builds"
             echo "Forcing rebuild instead"
@@ -150,8 +150,8 @@ jobs:
 
           # Create new tags by copying the manifest
           for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr '\n' ' '); do
-            echo "Creating tag: $tag"
-            docker buildx imagetools create --tag "$tag" "$SOURCE_IMAGE"
+            echo "Creating tag: ${tag}"
+            docker buildx imagetools create --tag "${tag}" "${SOURCE_IMAGE}"
           done
 
-          echo "Successfully retagged image from $SOURCE_IMAGE"
+          echo "Successfully retagged image from ${SOURCE_IMAGE}"
