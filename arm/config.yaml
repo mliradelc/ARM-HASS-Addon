@@ -1,8 +1,7 @@
 name: ARM
-version: "0.2.6"
+version: "0.2.7"
 slug: arm
 description: Automatic Ripping Machine
-stage: experimental
 link: https://github.com/mliradelc/ARM-HASS-Addon
 arch:
   - amd64
@@ -26,12 +25,11 @@ map:
   - share:rw
   - media:rw
 full_access: true
-# Disabled to try full_access
-# devices:
-#   - /dev/dri
-#   - /dev/sr0
-#   - /dev/sg0
-#   - /dev/dri/renderD128
+devices:
+  - /dev/dri
+  - /dev/sr0
+  - /dev/sg0
+  - /dev/dri/renderD128
 device_tree: true
 udev: true
 kernel_modules: true
