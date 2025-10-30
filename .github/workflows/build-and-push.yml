@@ -20,25 +20,74 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history to detect changes
 
       - name: Extract version from config.yaml
         id: version
         run: |
           # Get version from config.yaml
-          CONFIG_VERSION=$(grep '^version:' config.yaml | sed 's/version: *"\(.*\)"/\1/')
-          
+          CONFIG_VERSION=$(grep '^version:' arm/config.yaml | sed 's/version: *"\(.*\)"/\1/')
+
           # If this is a tag push, use the tag (remove 'v' prefix)
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
             GIT_TAG="${GITHUB_REF#refs/tags/}"
             VERSION="${GIT_TAG#v}"
           else
-            VERSION="$CONFIG_VERSION"
+            VERSION="${CONFIG_VERSION}"
           fi
-          
-          echo "addon_version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Building version: $VERSION"
+
+          echo "addon_version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Building version: ${VERSION}"
+
+      - name: Detect changes in image-relevant files
+        id: changes
+        run: |
+          # Define files that trigger image rebuild
+          IMAGE_FILES=(
+            ".docker/Dockerfile"
+            "arm/rootfs/run.sh"
+            "arm/rootfs/defaults/"
+          )
+
+          # Check if this is a tag push
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            # Get the previous tag
+            PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -A1 "^${GITHUB_REF#refs/tags/}$" | tail -1)
+
+            if [ -z "${PREVIOUS_TAG}" ]; then
+              echo "No previous tag found, forcing rebuild"
+              echo "rebuild=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+            echo "Comparing changes between ${PREVIOUS_TAG} and ${GITHUB_REF#refs/tags/}"
+
+            # Check if any image-relevant files changed
+            CHANGED=false
+            for file in "${IMAGE_FILES[@]}"; do
+              if git diff --name-only "${PREVIOUS_TAG}" "${GITHUB_REF#refs/tags/}" | grep -q "^${file}"; then
+                echo "Change detected in: ${file}"
+                CHANGED=true
+                break
+              fi
+            done
+
+            if [ "${CHANGED}" = true ]; then
+              echo "rebuild=true" >> "$GITHUB_OUTPUT"
+              echo "Image-relevant files changed, rebuild required"
+            else
+              echo "rebuild=false" >> "$GITHUB_OUTPUT"
+              echo "No image-relevant files changed, will retag existing image"
+            fi
+          else
+            # For workflow_dispatch or non-tag events, always rebuild
+            echo "rebuild=true" >> "$GITHUB_OUTPUT"
+            echo "Non-tag trigger, forcing rebuild"
+          fi
 
       - name: Set up QEMU
+        if: steps.changes.outputs.rebuild == 'true'
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
@@ -67,6 +116,7 @@ jobs:
             type=raw,value=${{ steps.version.outputs.addon_version }}
 
       - name: Build and push Docker image
+        if: steps.changes.outputs.rebuild == 'true'
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -77,3 +127,31 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Retag existing image
+        if: steps.changes.outputs.rebuild == 'false'
+        run: |
+          echo "No rebuild needed, retagging existing image"
+
+          # Get the previous tag to use as source
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -A1 "^${GITHUB_REF#refs/tags/}$" | tail -1)
+          SOURCE_IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${PREVIOUS_TAG#v}"
+
+          echo "Source image: ${SOURCE_IMAGE}"
+          echo "New tags: ${{ steps.meta.outputs.tags }}"
+
+          # Pull the source image for both architectures
+          docker buildx imagetools create --tag dummy "${SOURCE_IMAGE}" 2>/dev/null || {
+            echo "Warning: Could not verify source image exists"
+            echo "This may be expected for first-time builds"
+            echo "Forcing rebuild instead"
+            exit 1
+          }
+
+          # Create new tags by copying the manifest
+          for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr '\n' ' '); do
+            echo "Creating tag: ${tag}"
+            docker buildx imagetools create --tag "${tag}" "${SOURCE_IMAGE}"
+          done
+
+          echo "Successfully retagged image from ${SOURCE_IMAGE}"

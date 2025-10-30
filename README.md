@@ -34,3 +34,25 @@ Is also possible to edit configs directly inside ARM user interface, which will 
 ## Install
 
 Add this repository URL to the Home Assistant add-on store (Settings → Add-ons → Add-on Store → ⁝ → Repositories), then install the “ARM” add-on from the list. The add-on listens on port 8089 and creates its configuration files on first run.
+
+## Development & CI/CD
+
+### Container Image Build Optimization
+
+The GitHub Actions workflow intelligently determines whether to rebuild the container image or retag an existing one:
+
+**Image rebuild is triggered when:**
+- `.docker/Dockerfile` is modified
+- `arm/rootfs/run.sh` is modified
+- Any file in `arm/rootfs/defaults/` is modified
+
+**Image retagging (no rebuild) occurs when:**
+- Only non-image files are changed (e.g., documentation, configuration metadata)
+- This saves build time and resources by reusing the existing multi-arch image
+
+The workflow automatically:
+1. Detects changes between the current and previous git tags
+2. Rebuilds the image if any image-relevant files changed
+3. Retags the existing image with new version labels if no relevant changes detected
+
+This optimization reduces unnecessary builds while ensuring the image is always rebuilt when functional changes occur.
