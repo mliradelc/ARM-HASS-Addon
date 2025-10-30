@@ -56,3 +56,5 @@ The workflow automatically:
 3. Retags the existing image with new version labels if no relevant changes detected
 
 This optimization reduces unnecessary builds while ensuring the image is always rebuilt when functional changes occur.
+
+Note: For manual triggers (workflow_dispatch) the workflow now compares the branch changes against the repository default branch (assumed `master`) and will retag the latest image if only non-image files changed. If your default branch is not `master`, adjust the workflow's DEFAULT_BRANCH variable accordingly.
