@@ -97,6 +97,16 @@ fi
 
 # Verify and display config being used
 echo "[INFO] Starting ARM web UI"
+
+# Add root to the cdrom and disk groups to ensure access to optical drives
+echo "[INFO] Adding root to cdrom and disk groups..."
+if getent group cdrom > /dev/null; then
+    usermod -a -G cdrom root
+fi
+if getent group disk > /dev/null; then
+    usermod -a -G disk root
+fi
+
 echo "[INFO] Config directory: ${CONFIG_DIR} (persistent)"
 echo "[INFO] Config file: ${CONFIG_DIR}/arm.yaml"
 echo "[INFO] Symlinked at: /etc/arm/config"

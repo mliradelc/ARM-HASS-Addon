@@ -2,6 +2,10 @@
 
 All notable changes to the ARM Home Assistant add-on are documented in this file. Release dates use the YYYY-MM-DD format.
 
+## [0.2.8] - 2025-10-30
+
+- **Fixed**: Added the `root` user to the `cdrom` and `disk` groups within the container to resolve device permission errors when accessing optical drives.
+
 ## [0.2.5] - 2025-10-29
 
 - **Warning**: Expanded privileges by setting `privileged: true` in addition to `full_access: true`, granting the container every host capability for deep troubleshooting.
